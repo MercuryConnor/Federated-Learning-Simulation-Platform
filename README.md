@@ -1,377 +1,170 @@
 # Federated Learning Simulation Platform
 
-A **research-grade simulation platform** for evaluating decentralized machine learning workflows using Federated Averaging (FedAvg).
+A research-grade federated learning experimentation platform for simulating decentralized learning across multiple client nodes and benchmarking performance against centralized training.
 
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)
-![TensorFlow 2.15](https://img.shields.io/badge/TensorFlow-2.15-orange.svg)
+This project is designed for:
+- privacy-preserving learning research
+- reproducible ML experimentation
+- centralized vs federated performance comparison
+- experiment logging, evaluation, and visualization
 
----
-
-## 🎯 Project Overview
-
-This platform enables **reproducible, academically defensible experiments** comparing centralized and federated learning approaches.
-
-**Key Features:**
-- ✅ Privacy-preserving ML experimentation
-- ✅ Federated Averaging (FedAvg) implementation
-- ✅ Deterministic and reproducible execution
-- ✅ Comprehensive performance metrics and visualization
-- ✅ Non-IID client data partitioning
-- ✅ Research-ready analysis tools
-
-**Use Cases:**
-- Benchmarking federated vs centralized learning
-- Evaluating convergence behavior under data heterogeneity
-- Analyzing privacy-performance trade-offs
-- Academic research and publication
+The platform emphasizes:
+- modular experiment design
+- deterministic execution
+- academic-style benchmarking
+- explainable and transparent evaluation
 
 ---
 
-## 📊 Experiment Design
+## Overview
+This platform simulates a federated learning environment in which:
+- multiple synthetic client datasets are generated
+- local models are trained independently on each client
+- client updates are aggregated using Federated Averaging (FedAvg)
+- a global model is updated round-by-round
 
-### Centralized Baseline
-- Traditional supervised learning on complete dataset
-- Upper-bound performance reference
-- Full data access and batch training
+A centralized training pipeline using the same dataset and model is included to serve as a performance baseline.
 
-### Federated Learning
-- Simulates multiple independent clients with private data
-- FedAvg aggregation algorithm
-- Configurable client participation
-- Round-based distributed training
-
-### Comparison Metrics
-- Test set accuracy and loss
-- Convergence speed and stability
-- Communication efficiency
-- Generalization performance
+Both pipelines:
+- share the same model architecture
+- share the same dataset generator
+- use structured logging and saved metrics
+- produce convergence comparison plots
 
 ---
 
-## 🏗️ Architecture
-
-```
-Federate/
-├── config.py              # Global experiment configuration
-├── dataset.py             # Synthetic dataset generation & partitioning
-├── model.py               # Shared neural network architecture
-├── centralized.py         # Centralized training pipeline
-├── federated.py           # Federated learning pipeline (TFF)
-├── visualization.py       # Results visualization and comparison
-├── experiment.ipynb       # Main experiment notebook
-├── requirements.txt       # Python dependencies
-├── experiments/
-│   ├── logs/             # Training logs
-│   ├── results/          # Experiment results (JSON)
-│   └── figures/          # Generated visualizations
-└── README.md
+## Architecture
+Federated Learning Simulation Platform
 ```
 
-### Module Responsibilities
+ dataset.py               synthetic dataset generation
+ model.py                 shared model architecture
+ centralized.py           centralized training pipeline
+ federated.py             federated simulation / FedAvg training
+ visualization.py         experiment comparison and charts
 
-| Module | Purpose |
-|--------|---------|
-| `config.py` | Centralized configuration management, reproducibility settings |
-| `dataset.py` | Synthetic data generation, non-IID client partitioning |
-| `model.py` | Neural network architecture (shared by both paradigms) |
-| `centralized.py` | Baseline centralized training and evaluation |
-| `federated.py` | FedAvg simulation with TensorFlow Federated |
-| `visualization.py` | Performance comparison charts and metrics |
-| `experiment.ipynb` | Complete experiment workflow and analysis |
+ experiments/
+    results/             JSON logs and saved models
+    figures/             accuracy and loss comparison plots
 
----
-
-## 🚀 Quick Start
-
-### 1. Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/MercuryConnor/Federated-Learning-Simulation-Platform.git
-cd Federated-Learning-Simulation-Platform
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+ Dockerfile
+ docker-compose.yml
+ RESULTS.md
+ README.md
 ```
 
-### 2. Run Experiments
-
-#### Option A: Jupyter Notebook (Recommended)
-```bash
-jupyter notebook experiment.ipynb
-```
-Execute all cells to run the complete experiment.
-
-#### Option B: Python Scripts
-```bash
-# Run centralized baseline
-python centralized.py
-
-# Run federated learning
-python federated.py
-
-# Generate visualizations
-python visualization.py
-```
-
-### 3. View Results
-
-Results are saved in:
-- `experiments/results/` - JSON files with metrics
-- `experiments/figures/` - Visualization PNG files
-- `experiments/logs/` - Training logs
+The system follows reproducible ML experiment structure: modular, parameterized, and comparable across runs.
 
 ---
 
-## ⚙️ Configuration
+## Experiment Workflow
+### Centralized Training
+- Train a model on the full dataset
+- Evaluate on test split
+- Save metrics and weights
+- Log JSON results
+- Used as the upper-bound performance reference
 
-Modify [config.py](config.py) to adjust experiment parameters:
+### Federated Training Simulation
+- Generate deterministic synthetic dataset
+- Partition into multiple client datasets
+- Run per-client local training
+- Aggregate weights using FedAvg
+- Update global model each round
+- Evaluate federated global model
+- Save metrics and logs
 
-```python
-class ExperimentConfig:
-    # Reproducibility
-    RANDOM_SEED = 42
-    
-    # Dataset
-    DATASET_SIZE = 10000
-    NUM_FEATURES = 20
-    NUM_CLASSES = 2
-    
-    # Federated Learning
-    NUM_CLIENTS = 10          # Number of simulated clients
-    NUM_ROUNDS = 50           # Federated training rounds
-    CLIENT_FRACTION = 0.3     # Client participation rate
-    LOCAL_EPOCHS = 5          # Local training epochs
-    
-    # Training
-    BATCH_SIZE = 32
-    LEARNING_RATE = 0.01
-    CENTRALIZED_EPOCHS = 100
-    
-    # Model Architecture
-    HIDDEN_UNITS = [64, 32]
-    DROPOUT_RATE = 0.3
+This simulates private client data silos, decentralized compute, and global aggregation. No real networking or devices are used—this is a controlled offline simulator.
+
+---
+
+## Data Generation and Client Partitioning
+- Synthetic, deterministic, reproducible dataset
+- Client data is disjoint, locally isolated, and never shared
+- Configurable client count and dataset size for realistic federated heterogeneity
+
+---
+
+## Parameter Configuration
+Global experiment parameters are defined in [config.py](config.py), including number of clients, rounds, batch size, local epochs, learning rate, dataset size, and client participation fraction. All experiments use fixed random seeds to ensure reproducibility.
+
+---
+
+## Running the Platform (Docker)
+Build and start container:
+```
+docker compose up -d
 ```
 
-**Key Parameters:**
-
-| Parameter | Description | Impact |
-|-----------|-------------|--------|
-| `NUM_CLIENTS` | Number of federated clients | More clients = more heterogeneity |
-| `NUM_ROUNDS` | Federated training rounds | More rounds = better convergence |
-| `CLIENT_FRACTION` | Clients selected per round | Higher = faster but more communication |
-| `LOCAL_EPOCHS` | Local training iterations | Higher = more local learning |
-
----
-
-## 📈 Results and Visualization
-
-The platform automatically generates:
-
-### 1. Training Convergence Curves
-- Loss progression (centralized vs federated)
-- Accuracy progression across epochs/rounds
-- Validation/test metrics overlay
-
-### 2. Final Performance Comparison
-- Bar charts comparing test accuracy and loss
-- Quantified performance gap analysis
-
-### 3. Client Participation Heatmap
-- Visual representation of client sampling
-- Participation frequency per round
-
-### 4. Performance Summary Table
-- Detailed metric comparison
-- Statistical analysis of differences
-
-**Example Output:**
+Run centralized training:
 ```
-======================================================================
-PERFORMANCE SUMMARY: CENTRALIZED VS FEDERATED
-======================================================================
-
-Metric                    Centralized      Federated    Difference
-----------------------------------------------------------------------
-Test Accuracy                  0.8750         0.8420       +0.0330
-Test Loss                      0.3245         0.3892       -0.0647
-======================================================================
-
-INTERPRETATION:
-  - Accuracy Gap: 3.30% (Centralized better)
-  - Loss Gap: 0.0647 (Federated better)
-======================================================================
+docker compose exec federate-tff python -c "from centralized import run_centralized_experiment; run_centralized_experiment()"
 ```
 
----
-
-## 🔬 Research Workflow
-
-### 1. Hypothesis Formation
-Define research questions:
-- How does data heterogeneity affect convergence?
-- What client participation rate optimizes performance?
-- What is the privacy-accuracy trade-off?
-
-### 2. Experiment Configuration
-Modify [config.py](config.py) with experimental parameters.
-
-### 3. Execution
-Run experiments via [experiment.ipynb](experiment.ipynb) or Python scripts.
-
-### 4. Analysis
-- Review convergence curves
-- Analyze performance gaps
-- Interpret client behavior
-
-### 5. Iteration
-- Adjust hyperparameters
-- Test different scenarios
-- Validate reproducibility
-
----
-
-## 🧪 Extending the Platform
-
-### Add New Aggregation Strategies
-Modify [federated.py](federated.py) to implement:
-- FedProx (proximal term regularization)
-- FedAdam (adaptive optimization)
-- Custom aggregation logic
-
-### Implement Differential Privacy
-Add noise mechanisms in aggregation:
-```python
-def private_aggregation(client_weights, epsilon):
-    # Add Gaussian noise for differential privacy
-    noise = np.random.normal(0, sensitivity/epsilon, weights.shape)
-    return np.mean(client_weights, axis=0) + noise
+Run federated simulation:
+```
+docker compose exec federate-tff python -c "from federated import run_federated_experiment; run_federated_experiment()"
 ```
 
-### Custom Dataset Strategies
-Extend [dataset.py](dataset.py) with:
-- Real-world data loaders
-- Different non-IID distributions
-- Imbalanced client scenarios
-
-### Advanced Metrics
-Add to [visualization.py](visualization.py):
-- Per-client performance analysis
-- Communication cost estimation
-- Fairness metrics
-
----
-
-## 📚 Technical Details
-
-### Dataset Generation
-- Synthetic binary classification using `sklearn.make_classification`
-- Deterministic generation with fixed seeds
-- Non-IID Dirichlet distribution for client partitioning
-
-### Model Architecture
-- Feedforward neural network
-- Configurable hidden layers with ReLU activation
-- Dropout regularization
-- Binary cross-entropy loss
-
-### Federated Learning Implementation
-- TensorFlow Federated (TFF) framework
-- Federated Averaging (McMahan et al., 2017)
-- Client sampling per round
-- Model weight aggregation
-
-### Reproducibility Guarantees
-- Fixed random seeds across all components
-- Deterministic TensorFlow operations
-- Versioned dependencies
-- Consistent data splits
-
----
-
-## 🎓 Research Context
-
-This platform is designed for:
-
-**Academic Research:**
-- ML conference submissions
-- Journal publications
-- Thesis experiments
-
-**Interview Preparation:**
-- Demonstrating federated learning understanding
-- Explaining implementation choices
-- Discussing research methodology
-
-**Industrial Applications:**
-- Prototyping federated systems
-- Benchmarking algorithms
-- Privacy-preserving ML evaluation
-
-### Key Research Questions
-
-1. **Convergence:** How does federated learning converge compared to centralized training?
-2. **Heterogeneity:** What is the impact of non-IID data distribution?
-3. **Communication:** How many rounds are needed for comparable performance?
-4. **Privacy-Performance Trade-off:** What accuracy do we sacrifice for privacy?
-5. **Client Dynamics:** How does client participation affect stability?
-
----
-
-## 📖 References
-
-- McMahan et al. (2017). "Communication-Efficient Learning of Deep Networks from Decentralized Data"
-- Li et al. (2020). "Federated Optimization in Heterogeneous Networks"
-- Kairouz et al. (2021). "Advances and Open Problems in Federated Learning"
-
----
-
-## 🤝 Contributing
-
-This is a research platform. Contributions welcome:
-- New aggregation algorithms
-- Improved visualization
-- Additional metrics
-- Documentation improvements
-
----
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
----
-
-## 🔗 Repository
-
-**GitHub:** https://github.com/MercuryConnor/Federated-Learning-Simulation-Platform
-
----
-
-## 📧 Contact
-
-For questions about implementation or research collaboration, open an issue on GitHub.
-
----
-
-## 🏆 Citation
-
-If you use this platform in your research, please cite:
-
-```bibtex
-@software{federated_learning_simulation_platform,
-  author = {Mercury Connor},
-  title = {Federated Learning Simulation Platform},
-  year = {2025},
-  url = {https://github.com/MercuryConnor/Federated-Learning-Simulation-Platform}
-}
+Generate comparison charts:
+```
+docker compose exec federate-tff python -c "from visualization import generate_comparison_plots; generate_comparison_plots()"
 ```
 
+Artifacts are written to [experiments/results](experiments/results) and [experiments/figures](experiments/figures).
+
+Environment used for validated runs: Docker (Linux), TensorFlow 2.14.1, TensorFlow Federated 0.73.0.
+
 ---
 
-**Built for rigorous experimentation. Designed for reproducible research.**
+## Results and Performance Comparison
+Documented in [RESULTS.md](RESULTS.md).
+
+**Centralized Training (Baseline)**
+- Test Accuracy: ~0.9693
+- Loss: 0.1166
+- Artifacts: [experiments/results/centralized_results_20260101_143631.json](experiments/results/centralized_results_20260101_143631.json), [experiments/results/centralized_model_20260101_143631.keras](experiments/results/centralized_model_20260101_143631.keras)
+
+**Federated Learning (50 rounds)**
+- Test Accuracy: ~0.9153
+- Loss: 0.2429
+- Rounds Completed: 50 / 50
+- Artifact: [experiments/results/federated_results_20260101_143714.json](experiments/results/federated_results_20260101_143714.json)
+
+---
+
+## Convergence and Performance Charts
+Generated from saved logs:
+- Accuracy comparison: [experiments/figures/federated_vs_centralized_accuracy.png](experiments/figures/federated_vs_centralized_accuracy.png)
+- Loss comparison: [experiments/figures/federated_vs_centralized_loss.png](experiments/figures/federated_vs_centralized_loss.png)
+
+These plots illustrate that centralized training converges faster and higher; federated learning converges gradually via FedAvg while maintaining competitive accuracy—reflecting expected FL trade-offs where centralized maximizes accuracy and federated prioritizes data locality.
+
+---
+
+## Reproducibility
+- Deterministic dataset generation and fixed random seeds
+- Structured JSON experiment logs under [experiments/results](experiments/results)
+- Shared architecture across pipelines
+- Docker-validated runtime to avoid dependency drift
+
+---
+
+## Extensibility for Further Research
+- Non-IID client partitioning
+- Variable participation sampling
+- Additional aggregation strategies
+- Per-round metric export and analysis
+- Federated robustness experiments
+
+These can be added without modifying the core pipeline design.
+
+---
+
+## Why This Matters
+This project demonstrates applied federated learning engineering, decentralized learning system behavior, experiment-driven ML evaluation, and research-grade workflow. Suitable for AI research portfolios, ML benchmarking, federated learning concept demonstration, and academic-style study environments.
+
+---
+
+## Conclusion
+This platform provides a clean federated training simulator, a centralized baseline reference, structured logs and experiment outputs, convergence visualization, reproducible execution, and an extensible research foundation. It enables meaningful study of privacy-preserving distributed learning, performance vs convergence trade-offs, and federated aggregation behavior.

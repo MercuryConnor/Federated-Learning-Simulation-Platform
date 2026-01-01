@@ -1,20 +1,22 @@
-# Federated Learning Simulation Platform - Dependencies
+# Federated Learning Simulation Platform - Reproducible Dependencies
+# Environment aligned with Docker runtime
 
-# Core ML Framework
-tensorflow==2.15.0
-tensorflow-federated==0.71.0
+# Core ML Frameworks
+tensorflow==2.14.1
+tensorflow-federated==0.73.0
 
 # Data Processing
-numpy==1.24.3
-pandas==2.1.0
+numpy==1.26.4
+pandas==2.1.4
 
 # Visualization
-matplotlib==3.8.0
-seaborn==0.13.0
+matplotlib==3.8.2
+seaborn==0.13.2
 
-# Notebook
+# Notebook Environment
 jupyter==1.0.0
-ipykernel==6.25.2
+ipykernel==6.29.0
 
 # Utilities
-tqdm==4.66.1
+tqdm==4.66.4
+scikit-learn==1.3.2

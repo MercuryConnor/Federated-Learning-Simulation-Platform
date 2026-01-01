@@ -75,66 +75,65 @@ def partition_data_for_clients(X, y, num_clients, random_seed=None):
     """
     if random_seed is None:
         random_seed = ExperimentConfig.RANDOM_SEED
-    
+
+    if num_clients <= 0:
+        raise ValueError("num_clients must be positive")
+    if num_clients > len(y):
+        raise ValueError(f"num_clients ({num_clients}) cannot exceed dataset size ({len(y)})")
+    if len(X) != len(y):
+        raise ValueError("X and y must have the same number of samples")
+
     np.random.seed(random_seed)
-    
+
     # Create class-based partitioning for non-IID simulation
-    # This simulates realistic scenarios where clients have different class distributions
-    
     class_indices = {}
     for class_label in range(ExperimentConfig.NUM_CLASSES):
         class_indices[class_label] = np.where(y == class_label)[0]
         np.random.shuffle(class_indices[class_label])
-    
-    # Distribute data to clients with controlled heterogeneity
+
     client_datasets = []
-    
-    # Dirichlet distribution for non-IID partitioning
-    # Alpha controls heterogeneity: lower alpha = more heterogeneous
-    alpha = 0.5
-    
+    alpha = 0.5  # Lower = more heterogeneous
+    min_samples_per_client = 10
+    base_samples = max(min_samples_per_client, len(y) // num_clients)
+
     for client_id in range(num_clients):
         client_X_list = []
         client_y_list = []
-        
-        # Sample class proportions using Dirichlet distribution
+
         proportions = np.random.dirichlet([alpha] * ExperimentConfig.NUM_CLASSES)
-        
-        total_samples_per_client = len(y) // num_clients
-        
+
         for class_label in range(ExperimentConfig.NUM_CLASSES):
-            n_samples_for_class = int(proportions[class_label] * total_samples_per_client)
-            
-            # Get indices for this client from this class
-            start_idx = (len(class_indices[class_label]) // num_clients) * client_id
-            end_idx = start_idx + n_samples_for_class
-            
-            if end_idx > len(class_indices[class_label]):
-                end_idx = len(class_indices[class_label])
-            
-            selected_indices = class_indices[class_label][start_idx:end_idx]
-            
+            n_samples_for_class = int(proportions[class_label] * base_samples)
+            if n_samples_for_class == 0:
+                continue
+
+            available_indices = class_indices[class_label]
+            if len(available_indices) == 0:
+                continue
+
+            start_idx = min((len(available_indices) // num_clients) * client_id, len(available_indices))
+            end_idx = min(start_idx + n_samples_for_class, len(available_indices))
+            selected_indices = available_indices[start_idx:end_idx]
+
             if len(selected_indices) > 0:
                 client_X_list.append(X[selected_indices])
                 client_y_list.append(y[selected_indices])
-        
-        # Combine all class data for this client
-        if len(client_X_list) > 0:
+
+        if client_X_list:
             client_X = np.vstack(client_X_list)
             client_y = np.concatenate(client_y_list)
-            
-            # Shuffle client data
+
             shuffle_indices = np.random.permutation(len(client_y))
             client_X = client_X[shuffle_indices]
             client_y = client_y[shuffle_indices]
-            
             client_datasets.append((client_X, client_y))
         else:
-            # Fallback: ensure every client has some data
-            fallback_size = total_samples_per_client
-            fallback_indices = np.random.choice(len(y), size=fallback_size, replace=False)
+            fallback_indices = np.random.choice(len(y), size=min_samples_per_client, replace=False)
             client_datasets.append((X[fallback_indices], y[fallback_indices]))
-    
+
+    if len(client_datasets) != num_clients:
+        raise RuntimeError(f"Failed to create {num_clients} client datasets, got {len(client_datasets)}")
+
     return client_datasets
 
 
@@ -157,6 +156,15 @@ def create_centralized_datasets(X, y, validation_split=None, test_split=0.15, ra
     
     if random_seed is None:
         random_seed = ExperimentConfig.RANDOM_SEED
+
+    if len(X) != len(y):
+        raise ValueError("X and y must have the same number of samples")
+    if not (0 < test_split < 1):
+        raise ValueError("test_split must be in (0, 1)")
+    if not (0 < validation_split < 1):
+        raise ValueError("validation_split must be in (0, 1)")
+    if test_split + validation_split >= 1:
+        raise ValueError("test_split + validation_split must be < 1")
     
     # First split: separate test set
     X_temp, X_test, y_temp, y_test = train_test_split(
@@ -166,7 +174,7 @@ def create_centralized_datasets(X, y, validation_split=None, test_split=0.15, ra
     # Second split: separate validation set from training
     adjusted_val_split = validation_split / (1 - test_split)
     X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=adjusted_val_split, 
+        X_temp, y_temp, test_size=adjusted_val_split,
         random_state=random_seed, stratify=y_temp
     )
     

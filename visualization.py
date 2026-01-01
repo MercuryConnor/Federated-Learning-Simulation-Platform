@@ -331,6 +331,78 @@ def generate_all_visualizations(centralized_path, federated_path, output_dir=Non
     return figures
 
 
+def _latest_result_file(results_dir, prefix):
+    """Return the newest result file that matches the given prefix."""
+    candidates = [
+        f for f in os.listdir(results_dir)
+        if f.startswith(prefix) and f.endswith('.json')
+    ]
+    if not candidates:
+        raise FileNotFoundError(f"No result files found with prefix '{prefix}' in {results_dir}")
+    candidates.sort(key=lambda f: os.path.getmtime(os.path.join(results_dir, f)), reverse=True)
+    return os.path.join(results_dir, candidates[0])
+
+
+def generate_comparison_plots():
+    """Generate accuracy and loss comparison charts using the latest results."""
+    results_dir = ExperimentConfig.RESULTS_DIR
+    figures_dir = ExperimentConfig.FIGURES_DIR
+
+    os.makedirs(figures_dir, exist_ok=True)
+
+    # Locate most recent centralized and federated results
+    cent_path = _latest_result_file(results_dir, 'centralized_results_')
+    fed_path = _latest_result_file(results_dir, 'federated_results_')
+
+    with open(cent_path, 'r') as f:
+        centralized_data = json.load(f)
+    with open(fed_path, 'r') as f:
+        federated_data = json.load(f)
+
+    cent_metrics = centralized_data['training_metrics']
+    fed_metrics = federated_data['round_metrics']
+
+    # Accuracy plot
+    acc_fig, acc_ax = plt.subplots(figsize=(10, 5))
+    epochs = range(1, len(cent_metrics['accuracy']) + 1)
+    acc_ax.plot(epochs, cent_metrics['accuracy'], label='Centralized Train', color='#2E86AB', linewidth=2)
+    if 'val_accuracy' in cent_metrics:
+        acc_ax.plot(epochs, cent_metrics['val_accuracy'], label='Centralized Val', color='#2E86AB', linestyle='--', linewidth=2)
+    rounds = fed_metrics['round']
+    acc_ax.plot(rounds, fed_metrics['train_accuracy'], label='Federated Train', color='#A23B72', linewidth=2, marker='o', markersize=4, markevery=5)
+    acc_ax.plot(rounds, fed_metrics['test_accuracy'], label='Federated Test', color='#A23B72', linestyle='--', linewidth=2, marker='s', markersize=4, markevery=5)
+    acc_ax.set_xlabel('Epoch / Round')
+    acc_ax.set_ylabel('Accuracy')
+    acc_ax.set_title('Federated vs Centralized Accuracy')
+    acc_ax.grid(True, alpha=0.3)
+    acc_ax.legend()
+    acc_path = os.path.join(figures_dir, 'federated_vs_centralized_accuracy.png')
+    acc_fig.tight_layout()
+    acc_fig.savefig(acc_path, dpi=300, bbox_inches='tight')
+
+    # Loss plot
+    loss_fig, loss_ax = plt.subplots(figsize=(10, 5))
+    loss_ax.plot(epochs, cent_metrics['loss'], label='Centralized Train', color='#2E86AB', linewidth=2)
+    if 'val_loss' in cent_metrics:
+        loss_ax.plot(epochs, cent_metrics['val_loss'], label='Centralized Val', color='#2E86AB', linestyle='--', linewidth=2)
+    loss_ax.plot(rounds, fed_metrics['train_loss'], label='Federated Train', color='#A23B72', linewidth=2, marker='o', markersize=4, markevery=5)
+    loss_ax.plot(rounds, fed_metrics['test_loss'], label='Federated Test', color='#A23B72', linestyle='--', linewidth=2, marker='s', markersize=4, markevery=5)
+    loss_ax.set_xlabel('Epoch / Round')
+    loss_ax.set_ylabel('Loss')
+    loss_ax.set_title('Federated vs Centralized Loss')
+    loss_ax.grid(True, alpha=0.3)
+    loss_ax.legend()
+    loss_path = os.path.join(figures_dir, 'federated_vs_centralized_loss.png')
+    loss_fig.tight_layout()
+    loss_fig.savefig(loss_path, dpi=300, bbox_inches='tight')
+
+    print("Generated comparison plots:")
+    print(f"  Accuracy: {acc_path}")
+    print(f"  Loss: {loss_path}")
+
+    return {'accuracy': acc_path, 'loss': loss_path}
+
+
 if __name__ == "__main__":
     # Test visualization functions
     print("Visualization module loaded successfully")

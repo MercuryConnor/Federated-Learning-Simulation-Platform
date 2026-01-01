@@ -15,11 +15,10 @@ This baseline is essential for understanding the performance trade-offs
 inherent in federated learning.
 """
 
-import numpy as np
-import tensorflow as tf
 from datetime import datetime
 import json
 import os
+import numpy as np
 
 from config import ExperimentConfig
 from model import create_compiled_model
@@ -93,17 +92,17 @@ class CentralizedTrainer:
         """
         if self.model is None:
             raise ValueError("Model must be trained before evaluation")
-        
-        results = self.model.evaluate(X_test, y_test, verbose=0)
-        
+
+        results = self.model.evaluate(X_test, y_test, verbose=0, return_dict=True)
+
         metrics = {
-            "test_loss": float(results[0]),
-            "test_accuracy": float(results[1]),
-            "test_precision": float(results[2]),
-            "test_recall": float(results[3]),
-            "test_auc": float(results[4])
+            "test_loss": float(results.get('loss', 0.0)),
+            "test_accuracy": float(results.get('accuracy', 0.0)),
+            "test_precision": float(results.get('precision', 0.0)),
+            "test_recall": float(results.get('recall', 0.0)),
+            "test_auc": float(results.get('auc', 0.0))
         }
-        
+
         return metrics
     
     def get_training_metrics(self):

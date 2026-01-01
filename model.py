@@ -14,6 +14,7 @@ The model must remain identical across both training paradigms to ensure
 valid performance comparison.
 """
 
+import numpy as np
 import tensorflow as tf
 from config import ExperimentConfig
 
@@ -62,7 +63,7 @@ def compile_model(model, learning_rate=None):
         learning_rate = ExperimentConfig.LEARNING_RATE
     
     model.compile(
-        optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
         loss=tf.keras.losses.BinaryCrossentropy(),
         metrics=[
             tf.keras.metrics.BinaryAccuracy(name='accuracy'),
@@ -114,9 +115,14 @@ def count_model_parameters():
         Dictionary with parameter counts
     """
     model = create_model()
-    
-    trainable_params = sum([tf.size(w).numpy() for w in model.trainable_weights])
-    non_trainable_params = sum([tf.size(w).numpy() for w in model.non_trainable_weights])
+
+    # Count parameters safely across TensorFlow versions
+    try:
+        trainable_params = sum(int(tf.size(w)) for w in model.trainable_weights)
+        non_trainable_params = sum(int(tf.size(w)) for w in model.non_trainable_weights)
+    except (AttributeError, TypeError):
+        trainable_params = sum(np.prod(w.shape) for w in model.trainable_weights)
+        non_trainable_params = sum(np.prod(w.shape) for w in model.non_trainable_weights)
     total_params = trainable_params + non_trainable_params
     
     return {
