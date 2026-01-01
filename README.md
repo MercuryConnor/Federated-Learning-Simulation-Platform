@@ -168,3 +168,65 @@ This project demonstrates applied federated learning engineering, decentralized 
 
 ## Conclusion
 This platform provides a clean federated training simulator, a centralized baseline reference, structured logs and experiment outputs, convergence visualization, reproducible execution, and an extensible research foundation. It enables meaningful study of privacy-preserving distributed learning, performance vs convergence trade-offs, and federated aggregation behavior.
+
+---
+
+## Results — Centralized vs Federated Training
+The platform was executed inside the validated Docker environment. Both pipelines successfully completed end-to-end training and evaluation.
+
+### Experiment Summary
+| Training Mode | Test Accuracy | Test Loss | Notes |
+|--------------|-------------:|---------:|------|
+| **Centralized (Baseline)** | **0.9693** | 0.1166 | Trained on full dataset |
+| **Federated (50 Rounds)** | **0.9153** | 0.2429 | FedAvg aggregation, sampled clients |
+
+Artifacts generated:
+| Output Type | Location |
+|----------|--------|
+| Centralized metrics log | [experiments/results/centralized_results_20260101_143631.json](experiments/results/centralized_results_20260101_143631.json) |
+| Centralized model file | [experiments/results/centralized_model_20260101_143631.keras](experiments/results/centralized_model_20260101_143631.keras) |
+| Federated metrics log | [experiments/results/federated_results_20260101_143714.json](experiments/results/federated_results_20260101_143714.json) |
+
+These results align with expected FL behavior:
+- centralized training achieves the upper-bound accuracy
+- federated training converges more slowly but maintains strong performance
+
+---
+
+## Convergence and Performance Visualization
+
+### Accuracy — Centralized vs Federated
+![Federated vs Centralized Accuracy](experiments/figures/federated_vs_centralized_accuracy.png)
+
+### Loss — Centralized vs Federated
+![Federated vs Centralized Loss](experiments/figures/federated_vs_centralized_loss.png)
+
+The plots demonstrate:
+- centralized training converges faster and higher
+- federated learning improves progressively via FedAvg
+- final federated accuracy remains competitive despite decentralized training
+
+This reflects the fundamental trade-off between centralized model performance and privacy-preserving decentralized learning.
+
+---
+
+## Results Gallery — Convergence and Performance
+A visual comparison of centralized vs federated learning behavior.
+
+<p align="center">
+<b>Accuracy Comparison</b><br>
+<img src="experiments/figures/federated_vs_centralized_accuracy.png" width="420">
+
+<br><br>
+
+<b>Loss Comparison</b><br>
+<img src="experiments/figures/federated_vs_centralized_loss.png" width="420">
+
+</p>
+
+The figures illustrate:
+- Centralized training converges faster and achieves higher final accuracy
+- Federated learning improves gradually over communication rounds
+- FedAvg produces stable convergence despite decentralized client updates
+
+These behaviors are consistent with established findings in federated learning literature.
