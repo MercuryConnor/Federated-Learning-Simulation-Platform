@@ -207,26 +207,4 @@ The plots demonstrate:
 - final federated accuracy remains competitive despite decentralized training
 
 This reflects the fundamental trade-off between centralized model performance and privacy-preserving decentralized learning.
-
----
-
-## Results Gallery — Convergence and Performance
-A visual comparison of centralized vs federated learning behavior.
-
-<p align="center">
-<b>Accuracy Comparison</b><br>
-<img src="experiments/figures/federated_vs_centralized_accuracy.png" width="420">
-
-<br><br>
-
-<b>Loss Comparison</b><br>
-<img src="experiments/figures/federated_vs_centralized_loss.png" width="420">
-
-</p>
-
-The figures illustrate:
-- Centralized training converges faster and achieves higher final accuracy
-- Federated learning improves gradually over communication rounds
-- FedAvg produces stable convergence despite decentralized client updates
-
 These behaviors are consistent with established findings in federated learning literature.
